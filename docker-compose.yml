@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "password"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+
+  aws-glue:
+    build: .
+    environment:
+      - AWS_PROFILE=local_glue
+    volumes:
+      - .:/app
+      - ~/.aws:/root/.aws
+    depends_on:
+      - sqlserver
+    working_dir: /app
+    command: python3 main.py
