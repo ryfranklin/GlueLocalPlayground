@@ -1,15 +1,17 @@
 import setup_database
 import generate_data
-
+from time import sleep
 from pyspark.sql import SparkSession
 import threading
 
-def read_from_sqlserver():
+def read_from_sqlserver(spark):
     # Define SQL Server connection properties
-    jdbc_url = "jdbc:sqlserver://sqlserver:1433"
+    jdbc_url = "jdbc:sqlserver://sqlserver:1433;"\
+        "encrypt=true;trustServerCertificate=true;"\
+        "database=TestDB;"
     connection_properties = {
         "user": "sa",
-        "password": "password",
+        "password": "Password!123",
         "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver"
     }
 
@@ -18,7 +20,7 @@ def read_from_sqlserver():
                          table="Orders",
                          properties=connection_properties
                          )
-    df.show()
+    return df
 
 def main():
     # Set up the database
@@ -26,14 +28,19 @@ def main():
 
     # Start generating data in a seperate thread
     data_gen_thread = threading.Thread(target=generate_data.generate_fake_data,
-                                       args=(10))  # one order per second
+                                       args=(1,))  # one order per second
     data_gen_thread.start()
 
     # Initialzie Spark Session
-    spark = SparkSession.builder.appName("AWS Glue POC with Docker").getOrCreate()
+    spark = SparkSession.builder.appName("AWS Glue POC with Docker")\
+        .config("spark.jars", "/opt/mssql-jdbc.jar")\
+        .getOrCreate()
 
     # Define SQL Server connection properties
-    read_from_sqlserver(spark)
+    while True:
+        df = read_from_sqlserver(spark)
+        df.show()
+        sleep(10)
 
     spark.stop()
 

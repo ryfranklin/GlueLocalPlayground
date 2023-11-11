@@ -8,7 +8,7 @@ def create_connection():
                           'SERVER=sqlserver;'
                           'DATABASE=TestDB;'
                           'UID=sa;'
-                          'PWD=password')
+                          'PWD=Password!123')
     return conn
 
 def insert_order(cursor, order_id, customer_id, item_code, order_date):
