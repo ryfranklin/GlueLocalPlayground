@@ -1,5 +1,5 @@
 # Use a Python base image
-FROM python:3.8-slim-bullseye
+FROM python:3.14.0a3-slim-bullseye
 
 # Install system dependencies required for PyODBC and other Python packages
 RUN apt-get update \
